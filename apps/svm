@@ -23,11 +23,18 @@ if [ -f $TMP/$thisname.mib ] || [ -f $TMP/reboot.mib ]; then
 	return 2> /dev/null
 fi
 
+# Setup cleanup function for lock file
+cleanup_svm() {
+	rm -rf $TMP/$thisname.mib 2>/dev/null
+}
+
 MIBCAP=3
 . $thisdir/../config/MIBCHECK
 
 case $1 in
 	-f|-fix) {
+		# Setup trap for cleanup on any exit
+		trap cleanup_svm EXIT TERM INT
 		trap '' 2
 		[ -n "$GEM" ] && touch $TMP/$thisname.mib
 
@@ -82,21 +89,22 @@ case $1 in
 			$E2P w 3f0 00 00 01 >> $LOG
 			
 			echo -ne "\nDone. Try to delete DTC 1555 with any OBD2 tool!\n\n" | $TEE -a $LOG
-			rm -rf $TMP/$thisname.mib 2>/dev/null
+			cleanup_svm
 			trap 2
 			. $thisdir/reboot -t 10
 		else
 			echo -ne "clear SVM not possible...\n\n" | $TEE -a $LOG
 		fi
 
-		rm -rf $TMP/$thisname.mib 2>/dev/null
-
+		cleanup_svm
 		trap 2
 
 		return 2> /dev/null
 	};;	
 
 	-r|-read) {
+		# Setup trap for cleanup on any exit
+		trap cleanup_svm EXIT TERM INT
 		trap '' 2
 		[ -n "$GEM" ] && touch $TMP/$thisname.mib
 		echo -ne "\033[36m"
@@ -110,7 +118,7 @@ case $1 in
 		INPUT="$(cat $SWDL/CfgAck.bin | $XXD -p | awk '{print toupper($0)}')"
 		echo -ne "SVM Byte: "$INPUT"\n\n"  | $TEE -a $LOG
 
-		rm -rf $TMP/$thisname.mib 2>/dev/null
+		cleanup_svm
 
 		return 2> /dev/null
 	};;

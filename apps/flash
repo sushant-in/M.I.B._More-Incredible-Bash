@@ -20,6 +20,11 @@ if [ -f $TMP/$thisname.mib ] || [ -f $TMP/reboot.mib ]; then
 	return 2> /dev/null
 fi
 
+# Setup cleanup function for lock file
+cleanup_flash() {
+	rm -rf $TMP/$thisname.mib 2>/dev/null
+}
+
 MIBCAP=3
 . $thisdir/../config/MIBCHECK
 
@@ -93,8 +98,9 @@ function IFSstage2 {
 			echo -ne "Possible reasons:\n1. Read error from SD\n2. SD card faulty\n3. File on SD corrupted\n\n"
 			echo -ne "Actions:\n1. Copy patch file again to SD --> try to flash again\n   You can safely remove and insert SD now\n2. Still failing --> try with a FRESH SD card\n3. Still Failing --> get in contact with experts and share your log file\nAs long as you do not reboot or power down the unit the failed flash will not take effect.\nRecovery will be easier this way. However, even a rebooted unit can (most likely) be recovered with expert help and 20-50$ of hardware\n\n-- DO NOT PANIC - GET HELP --\n\n"
 			echo -ne "You can go back now...\n"
-			rm -rf $TMP/$thisname.mib 2>/dev/null
-			exit 0
+			cleanup_flash
+			trap 2
+			exit 1
 		fi
 
 		trap 2
@@ -165,6 +171,8 @@ function LITTLE2BIG {
 
 	-p|-patch) {
 
+		# Setup trap for cleanup on any exit
+		trap cleanup_flash EXIT TERM INT
 		trap '' 2
 			[ -n "$GEM" ] && touch $TMP/$thisname.mib
 
@@ -343,6 +351,8 @@ function LITTLE2BIG {
 
 	-r|-restore) {
 
+	# Setup trap for cleanup on any exit
+	trap cleanup_flash EXIT TERM INT
 	trap '' 2
 			[ -n "$GEM" ] && touch $TMP/$thisname.mib
 

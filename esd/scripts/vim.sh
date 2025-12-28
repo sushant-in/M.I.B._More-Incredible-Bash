@@ -7,6 +7,15 @@ if [ -f /net/rcc/dev/shmem/vim.mib ]; then
 	exit 0
 fi
 
+# Create lock file immediately after check
+touch /net/rcc/dev/shmem/vim.mib
+
+# Setup cleanup trap for proper lock file removal
+cleanup_vim() {
+	rm -f /net/rcc/dev/shmem/vim.mib 2>/dev/null
+}
+trap cleanup_vim EXIT TERM INT
+
 trap '' 2
 
 export PATH=.:/proc/boot:/bin:/usr/bin:/usr/sbin:/sbin:/mnt/app/media/gracenote/bin:/mnt/app/armle/bin:/mnt/app/armle/sbin:/mnt/app/armle/usr/bin:/mnt/app/armle/usr/sbin

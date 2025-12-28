@@ -9,6 +9,15 @@ if [ -f /net/rcc/dev/shmem/reboot.mib ] || [ -f /net/rcc/dev/shmem/backup.mib ] 
 	exit 0
 fi
 
+# Create lock file immediately after check
+touch /net/rcc/dev/shmem/settrain.mib
+
+# Setup cleanup trap for proper lock file removal
+cleanup_settrain() {
+	rm -f /net/rcc/dev/shmem/settrain.mib 2>/dev/null
+}
+trap cleanup_settrain EXIT TERM INT
+
 export PATH=.:/proc/boot:/bin:/usr/bin:/usr/sbin:/sbin:/mnt/app/media/gracenote/bin:/mnt/app/armle/bin:/mnt/app/armle/sbin:/mnt/app/armle/usr/bin:/mnt/app/armle/usr/sbin
 export LD_LIBRARY_PATH=/lib:/mnt/app/root/lib-target:/eso/lib:/mnt/app/usr/lib:/mnt/app/armle/lib:/mnt/app/armle/lib/dll:/mnt/app/armle/usr/lib
 unset LD_PRELOAD

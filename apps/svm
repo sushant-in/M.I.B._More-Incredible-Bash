@@ -92,7 +92,14 @@ case $1 in
 			echo -ne "CfgAck - " | $TEE -a $LOG
 			. $thisdir/zlib -c $SWDL/CfgAck.bin
 			
-			$E2P w 3f0 00 00 01 >> $LOG
+			echo -ne "\nWriting to EEPROM address 3f0...\n" | $TEE -a $LOG
+			if ! $E2P w 3f0 00 00 01 >> $LOG 2>&1; then
+				echo -ne "Error: EEPROM write failed at address 3f0\n" | $TEE -a $LOG
+				echo -ne "SVM configuration not updated - please retry\n\n" | $TEE -a $LOG
+				cleanup_svm
+				trap 2
+				return 2> /dev/null
+			fi
 			
 			echo -ne "\nDone. Try to delete DTC 1555 with any OBD2 tool!\n\n" | $TEE -a $LOG
 			cleanup_svm

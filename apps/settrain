@@ -80,11 +80,30 @@ case $1 in
 					exit 1 ;;
 			esac
 			echo -ne "Changing train to $TARGETTRAIN\n" | $TEE -i -a $LOG
-			$E2P w 3a0 $(echo $TARGETTRAIN | awk '{print substr($1,1,16)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') >> $LOG
+			
+			echo -ne "--- Writing train part 1 to EEPROM address 3a0...\n" | $TEE -a $LOG
+			if ! $E2P w 3a0 $(echo $TARGETTRAIN | awk '{print substr($1,1,16)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') >> $LOG 2>&1; then
+				echo -ne "Error: EEPROM write failed at address 3a0\n" | $TEE -a $LOG
+				echo -ne "Train configuration not updated - please retry\n\n" | $TEE -a $LOG
+				trap 2
+				exit 1
+			fi
+			
+			echo -ne "--- Writing train part 2 to EEPROM address 3b0...\n" | $TEE -a $LOG
 			if [[ "$TARGETTRAIN" = *MHI2Q* ]]; then
-				$E2P w 3b0 $(echo $TARGETTRAIN | awk '{print substr($1,17,20)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') 20 >> $LOG
+				if ! $E2P w 3b0 $(echo $TARGETTRAIN | awk '{print substr($1,17,20)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') 20 >> $LOG 2>&1; then
+					echo -ne "Error: EEPROM write failed at address 3b0\n" | $TEE -a $LOG
+					echo -ne "Train configuration partially updated - please retry\n\n" | $TEE -a $LOG
+					trap 2
+					exit 1
+				fi
 			else
-				$E2P w 3b0 $(echo $TARGETTRAIN | awk '{print substr($1,17,19)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') 20 20 >> $LOG
+				if ! $E2P w 3b0 $(echo $TARGETTRAIN | awk '{print substr($1,17,19)}' 2>/dev/null | $XXD -p | $SED 's/../& /g' | $SED 's/0a //') 20 20 >> $LOG 2>&1; then
+					echo -ne "Error: EEPROM write failed at address 3b0\n" | $TEE -a $LOG
+					echo -ne "Train configuration partially updated - please retry\n\n" | $TEE -a $LOG
+					trap 2
+					exit 1
+				fi
 			fi
 		fi
 		

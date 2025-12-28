@@ -130,7 +130,14 @@ case $1 in
 			echo -ne "--- Variant region\n" | $TEE -a $LOG
 			# 1=Europe/ROW, 2=Europe, 3=NAR, 4=ROW, 5=China, 6=Japan, 7=Korea, 8=Asia, 9=Taiwan
 			$PERSW -f -t int 678364556 9 2 2>> $LOG
-			$E2P w E0 02 >> $LOG
+			
+			echo -ne "--- Writing region to EEPROM address E0...\n" | $TEE -a $LOG
+			if ! $E2P w E0 02 >> $LOG 2>&1; then
+				echo -ne "Error: EEPROM write failed at address E0\n" | $TEE -a $LOG
+				echo -ne "Region configuration not updated - please retry\n\n" | $TEE -a $LOG
+				trap 2
+				exit 1
+			fi
 
 			#echo -ne "switch variant feature byte type to High\n"
 			#$PC i:678364556:4 1

@@ -24,9 +24,21 @@ fi
 
 	-i|-install) {
 
-	mount -uw /net/mmx/mnt/app 2> /dev/null
+	if ! mount -uw /net/mmx/mnt/app 2> /dev/null; then
+		echo "Error: Failed to mount /net/mmx/mnt/app for write access"
+		echo "Cannot install GEM - mount failed"
+		return 2> /dev/null
+	fi
+	
 	on -f mmx rm -rf /net/mmx/mnt/app/eso/hmi/engdefs/z_Launcher-sda0.esd 2> /dev/null
-	on -f mmx ln -s /net/mmx/fs/sda0/esd/Launcher-sda0.esd /net/mmx/mnt/app/eso/hmi/engdefs/z_Launcher-sda0.esd 2> /dev/null
+	
+	if ! on -f mmx ln -s /net/mmx/fs/sda0/esd/Launcher-sda0.esd /net/mmx/mnt/app/eso/hmi/engdefs/z_Launcher-sda0.esd 2> /dev/null; then
+		echo "Warning: Failed to create symbolic link"
+		mount -ur /net/mmx/mnt/app 2> /dev/null
+		echo "GEM installation incomplete - link creation failed"
+		return 2> /dev/null
+	fi
+	
 	mount -ur /net/mmx/mnt/app 2> /dev/null
 	echo "GEM now installed!"
 	
@@ -37,7 +49,12 @@ fi
 
 	-u|-uninstall) {
 
-	mount -uw /net/mmx/mnt/app 2> /dev/null
+	if ! mount -uw /net/mmx/mnt/app 2> /dev/null; then
+		echo "Error: Failed to mount /net/mmx/mnt/app for write access"
+		echo "Cannot uninstall GEM - mount failed"
+		return 2> /dev/null
+	fi
+	
 	on -f mmx rm -rf /net/mmx/mnt/app/eso/hmi/engdefs/z_Launcher-sda0.esd 2> /dev/null
 	mount -ur /net/mmx/mnt/app 2> /dev/null
 	echo "GEM now uninstalled!"
@@ -78,4 +95,3 @@ fi
 	esac
 
 exit 0
-

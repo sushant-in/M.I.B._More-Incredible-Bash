@@ -43,7 +43,13 @@ case $1 in
 		[ -z "$GEM" ] && echo -ne "\n"
 		[ -z "$GEM" ] && echo -ne "\033[m"
 
-		mount -uw /net/rcc/mnt/efs-persist 2>/dev/null
+		if ! mount -uw /net/rcc/mnt/efs-persist 2>/dev/null; then
+			echo -ne "Error: Failed to mount /net/rcc/mnt/efs-persist for write access\n" | $TEE -a $LOG
+			echo -ne "Cannot proceed with SVM fix - mount failed\n\n" | $TEE -a $LOG
+			cleanup_svm
+			trap 2
+			return 2> /dev/null
+		fi
 
 		if [ -f $VERSIONS ]; then
 			echo -ne "extract build version...\n" | $TEE -a $LOG
@@ -111,7 +117,12 @@ case $1 in
 		echo -ne "Read SVM Byte\n\n" | $TEE -a $LOG
 		echo -ne "\033[m"
 
-		mount -uw /net/rcc/mnt/efs-persist 2>/dev/null
+		if ! mount -uw /net/rcc/mnt/efs-persist 2>/dev/null; then
+			echo -ne "Error: Failed to mount /net/rcc/mnt/efs-persist for write access\n" | $TEE -a $LOG
+			echo -ne "Cannot read SVM - mount failed\n\n" | $TEE -a $LOG
+			cleanup_svm
+			return 2> /dev/null
+		fi
 
 		. $thisdir/zlib -d $SWDL/CfgAck.z
 

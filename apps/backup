@@ -96,7 +96,7 @@ B2NAND() {
 case $1 in
 	-a|-b) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		[ -n "$GEM" ] && touch $TMP/backup.mib
@@ -417,7 +417,7 @@ case $1 in
 
 	-keys) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		echo -ne "Keys.............." | $TEE -i -a $LOG
@@ -432,7 +432,7 @@ case $1 in
 
 	-profile) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		echo -ne "Profile............" | $TEE -i -a $LOG
@@ -446,7 +446,7 @@ case $1 in
 
 	-GEM) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		echo -ne "GEM Menu........." | $TEE -i -a $LOG
@@ -462,7 +462,7 @@ case $1 in
 
 	-MIBROOT) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		echo -ne "MIBRoot.........." | $TEE -i -a $LOG
@@ -477,7 +477,7 @@ case $1 in
 
 	-nand) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		B2NAND
@@ -485,7 +485,7 @@ case $1 in
 
 	-rnand) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		echo -ne "recover backup from unit......\n" | $TEE -i -a $LOG
@@ -502,7 +502,7 @@ case $1 in
 
 	-clear) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 
 		if [ -d $BACKUPFOLDER ]; then
@@ -515,7 +515,7 @@ case $1 in
 
 	-ambient) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_backup EXIT TERM INT
+		trap cleanup_backup EXIT TERM
 		trap '' 2
 		
 		ROOT_AMB="/net/mmx/mnt/app/eso/hmi/lsd/Resources/skin0/Data"

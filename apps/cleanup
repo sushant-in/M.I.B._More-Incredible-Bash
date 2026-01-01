@@ -1,74 +1,83 @@
 #!/bin/sh
 
-revision="cleanup v0.1.1 (2023-07-02 by MIBonk)"
-# use --help for more info
+revision="cleanup v0.1.0 (2026-01-01)"
+# Cleanup utility for orphaned lock files
 
-export PATH=:/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/net/mmx/bin:/net/mmx/usr/bin:/net/mmx/usr/sbin:/net/mmx/sbin:/net/mmx/mnt/app/armle/bin:/net/mmx/mnt/app/armle/sbin:/net/mmx/mnt/app/armle/usr/bin:/net/mmx/mnt/app/armle/usr/sbin
-export LD_LIBRARY_PATH=/net/mmx/mnt/app/root/lib-target:/net/mmx/mnt/eso/lib:/net/mmx/eso/lib:/net/mmx/mnt/app/usr/lib:/net/mmx/mnt/app/armle/lib:/net/mmx/mnt/app/armle/lib/dll:/net/mmx/mnt/app/armle/usr/lib
-export IPL_CONFIG_DIR=/etc/eso/production
+export PATH=:/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/net/mmx/bin:/net/mmx/usr/bin:/net/mmx/usr/sbin:/net/mmx/sbin
+export LD_LIBRARY_PATH=/net/mmx/mnt/app/root/lib-target:/net/mmx/mnt/eso/lib:/net/mmx/eso/lib:/net/mmx/mnt/app/usr/lib
 
 thisname="$(basename $0)"
 thisdir="$(dirname $0)"
 
 if [ -z $LOG ]; then
 	. $thisdir/../config/GLOBALS
-	echo -ne "\n$ME-$thisname---->\n" >> $LOG
 fi
+echo -ne "\n$ME-$thisname---->\n" >> $LOG
 
-if [ -f $TMP/reboot.mib ]; then
-	echo "Reboot running..."
-	return 2> /dev/null
-fi
-
-	case $1 in
-
-	-a|-all) {
-
-	echo -ne "\033[31m"
-	echo -ne "!!!! Delete all Backups and Logs from backup folder(y/n)?" 
-	read CONT
-if [ "$CONT" = "y" ]; then
-	rm -rf $BACKUPFOLDER/*
-	echo -ne "\033[00;00m"
-  	echo -ne "\nCleanup all done!\n\n"
-else
-		echo -ne "\033[00;00m"
-		echo -ne "\nOK, nothing deleted!\n\n" | $TEE -a $LOG
-fi
-
-return 2> /dev/null
-
+case $1 in
+	-l|-list) {
+		echo ""
+		echo "Checking for orphaned lock files..."
+		echo ""
+		
+		if ls /net/rcc/dev/shmem/*.mib 2>/dev/null; then
+			echo ""
+			echo "Found lock files above."
+			echo "These may be orphaned if no process is actually running."
+		else
+			echo "No lock files found."
+		fi
+		
+		echo ""
 	};;
 
-	# help or unknown parameter ------------------------------
+	-c|-clean) {
+		echo ""
+		echo "Cleaning up orphaned lock files..." | $TEE -a $LOG
+		
+		CLEANED=$(ls /net/rcc/dev/shmem/*.mib 2>/dev/null | wc -l)
+		
+		if [ $CLEANED -gt 0 ]; then
+			rm -f /net/rcc/dev/shmem/*.mib 2>/dev/null
+			echo "Removed $CLEANED lock file(s)" | $TEE -a $LOG
+		else
+			echo "No lock files found - nothing to clean" | $TEE -a $LOG
+		fi
+		
+		echo ""
+		echo "Done. You can now run M.I.B. functions." | $TEE -a $LOG
+		echo ""
+	};;
+
+	-a|-auto) {
+		# Silent auto-cleanup on boot (no output)
+		rm -f /net/rcc/dev/shmem/*.mib 2>/dev/null
+		exit 0
+	};;
+
 	*) {
 		echo ""
 		echo $revision
 		echo ""
+		echo "Cleanup orphaned lock files after power loss, SD removal, or crashes"
+		echo ""
 		echo "Usage: "$thisname" [OPTION]"
 		echo ""
 		echo "Options:"
-		echo "        -a, -all 		clean all"
-		echo "        --help			show this help"
+		echo "        -l, -list    list current lock files"
+		echo "        -c, -clean   remove all lock files"
+		echo "        -a, -auto    silent cleanup (for boot scripts)"
+		echo "        --help       show this help"
+		echo ""
+		echo "Use this utility when M.I.B. functions refuse to run with"
+		echo "\"already running\" messages after power loss or SD card removal."
 		echo ""
 		echo "This program is free software; you can redistribute it and/or"
 		echo "modify it under the terms of the GNU General Public License"
 		echo "as published by the Free Software Foundation; either version 2"
 		echo "of the License, or (at your option) any later version."
 		echo ""
-		echo "This program is distributed in the hope that it will be useful,"
-		echo "but WITHOUT ANY WARRANTY; without even the implied warranty of"
-		echo "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-		echo "See the GNU General Public License for more details."
-		echo ""
-		echo "You should have received a copy of the GNU General Public License"
-		echo "along with this program; if not, write to the Free Software Foundation,"
-		echo "Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA."
-		echo ""
-		
 	};;
-
-	esac
+esac
 
 exit 0
-

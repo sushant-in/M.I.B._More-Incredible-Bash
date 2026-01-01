@@ -34,7 +34,7 @@ MIBCAP=3
 case $1 in
 	-f|-fix) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_svm EXIT TERM INT
+		trap cleanup_svm EXIT TERM
 		trap '' 2
 		[ -n "$GEM" ] && touch $TMP/$thisname.mib
 
@@ -117,7 +117,7 @@ case $1 in
 
 	-r|-read) {
 		# Setup trap for cleanup on any exit
-		trap cleanup_svm EXIT TERM INT
+		trap cleanup_svm EXIT TERM
 		trap '' 2
 		[ -n "$GEM" ] && touch $TMP/$thisname.mib
 		echo -ne "\033[36m"

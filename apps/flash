@@ -172,7 +172,7 @@ function LITTLE2BIG {
 	-p|-patch) {
 
 		# Setup trap for cleanup on any exit
-		trap cleanup_flash EXIT TERM INT
+		trap cleanup_flash EXIT TERM
 		trap '' 2
 			[ -n "$GEM" ] && touch $TMP/$thisname.mib
 
@@ -352,7 +352,7 @@ function LITTLE2BIG {
 	-r|-restore) {
 
 	# Setup trap for cleanup on any exit
-	trap cleanup_flash EXIT TERM INT
+	trap cleanup_flash EXIT TERM
 	trap '' 2
 			[ -n "$GEM" ] && touch $TMP/$thisname.mib
 

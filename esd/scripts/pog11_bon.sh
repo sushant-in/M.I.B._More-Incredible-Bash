@@ -7,15 +7,6 @@ if [ -f /net/rcc/dev/shmem/backup.mib ] || [ -f /net/rcc/dev/shmem/reboot.mib ] 
 	exit 0
 fi
 
-# Create lock file immediately after check
-touch /net/rcc/dev/shmem/pog11_bon.mib
-
-# Setup cleanup trap for proper lock file removal
-cleanup_pog11_bon() {
-	rm -f /net/rcc/dev/shmem/pog11_bon.mib 2>/dev/null
-}
-trap cleanup_pog11_bon EXIT TERM INT
-
 trap '' 2
 
 export PATH=.:/proc/boot:/bin:/usr/bin:/usr/sbin:/sbin:/mnt/app/media/gracenote/bin:/mnt/app/armle/bin:/mnt/app/armle/sbin:/mnt/app/armle/usr/bin:/mnt/app/armle/usr/sbin

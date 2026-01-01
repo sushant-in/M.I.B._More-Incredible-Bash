@@ -7,14 +7,6 @@ if [ -f /net/rcc/dev/shmem/svm.mib ]; then
 	exit 0
 fi
 
-# Create lock file immediately after check
-touch /net/rcc/dev/shmem/svm.mib
-
-# Setup cleanup trap for proper lock file removal
-cleanup() {
-	rm -f /net/rcc/dev/shmem/svm.mib 2>/dev/null
-}
-trap cleanup EXIT TERM INT
 trap '' 2
 
 export PATH=.:/proc/boot:/bin:/usr/bin:/usr/sbin:/sbin:/mnt/app/media/gracenote/bin:/mnt/app/armle/bin:/mnt/app/armle/sbin:/mnt/app/armle/usr/bin:/mnt/app/armle/usr/sbin
@@ -36,9 +28,6 @@ echo ""
 
 echo ""
 echo "All done! now you can go back..."
-
-# Cleanup is handled by trap, but call explicitly for clarity
-cleanup
 
 trap 2
 
